@@ -14,11 +14,15 @@ if (req.method === 'POST' && (!contentType || (contentType !== 'application/json
     next();
 });
 app.use((req, res, next) => {
-    const acceptType = req.headers['accept'];
-    if (!acceptType || acceptType.indexOf('application/json') === -1) {
-        return res.status(406).send('Not Acceptable');
+    if (req.method === 'GET') {
+        const acceptType = req.headers['accept'];
+        // Check if the Accept header is present and includes 'application/json'
+        if (!acceptType || acceptType.indexOf('application/json') === -1) {
+            return res.status(406).send('Not Acceptable');
+        }
+
     }
-    next();
+next();
 });
 
 app.use('/api/idols', idols)

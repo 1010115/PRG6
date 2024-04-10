@@ -142,7 +142,7 @@ exports.deleteIdol = async (req, res, next) => {
         if (!idol) {
             return res.status(400).json({message: 'Idol not found'});
         }
-        res.status(200).json({data: {}});
+        res.status(204).json({data: {}});
     } catch (error) {
         res.status(400).json({
             message: error.message
