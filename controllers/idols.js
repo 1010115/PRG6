@@ -117,19 +117,23 @@ exports.updateIdol = async (req, res, next) => {
             });
         }
 
-        const idol = await Idol.findByIdAndUpdate(req.params.id, req.body, {
+        let idol = await Idol.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
         });
         if (!idol) {
             return res.status(404).json({message: 'Idol not found'});
         }
+
+        idol = idol.toObject();
+        idol._links = {
+            self: {href: req.protocol + '://' + req.get('host') + req.originalUrl},
+            collection: {href: req.protocol + '://' + req.get('host') + '/api/idols'}
+        };
+
         res.status(200).json({
             data: idol,
-            _links: {
-                self: {href: req.protocol + '://' + req.get('host') + req.originalUrl},
-                collection: {href: req.protocol + '://' + req.get('host') + '/api/idols'}
-            }});
+            });
 
     } catch (error) {
         res.status(400).json({message: error.message});
