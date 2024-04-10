@@ -1,11 +1,10 @@
 const express = require('express');
 const connectDB = require("./db");
 const idols = require('./routes/idols');
-
 const app = express();
+
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-
 app.use((req, res, next) => {
     const contentType = req.headers['content-type'];
 if (req.method === 'POST' && (!contentType || (contentType !== 'application/json' && contentType !== 'application/x-www-form-urlencoded'))) {
@@ -29,7 +28,7 @@ app.use('/api/idols', idols)
 
 connectDB()
 
-const port = 80;
+const port = 8001;
 
 app.listen(port, () => console.log(`Listening on port ${port}...`));
 

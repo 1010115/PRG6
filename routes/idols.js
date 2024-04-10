@@ -11,12 +11,8 @@ const {
     optionsIdol
 } = require("../controllers/idols");
 
-router.route('/').get(getIdols)
-    .post(createIdol)
-    .options(optionsIdols)
-router.route('/:id').put(updateIdol).delete(deleteIdol)
-    .get(getIdol)
-    .options(optionsIdol)
+router.route('/').get(getIdols).post(createIdol).options(optionsIdols)
+router.route('/:id').put(updateIdol).delete(deleteIdol).get(getIdol).options(optionsIdol)
 
 
 module.exports = router;

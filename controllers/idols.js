@@ -1,10 +1,19 @@
 const Idol = require('../models/Idol');
+const cors = require('cors');
 
 exports.getIdols = async (req, res, next) => {
     try {
+
+        res.set({
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Allow': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type'
+        });
+
         const total = await Idol.countDocuments();
         const limit = parseInt(req.query.limit) || total;
-        let start = parseInt(req.query.start) || 0;
+        let start = parseInt(req.query.start) || 1;
         let page = Math.floor(start / limit) + 1;
         const pages = Math.ceil(total / limit);
 
@@ -42,15 +51,15 @@ exports.getIdols = async (req, res, next) => {
                 },
                 last: {
                     page: pages,
-                    href: req.protocol + '://' + req.get('host') + req.baseUrl + '?start=' + (pages - 1) * limit + '&limit=' + limit
+                    href: req.protocol + '://' + req.get('host') + req.baseUrl + '?start=' + (pages) * limit + '&limit=' + limit
                 },
                 next: {
                     page: page + 1,
                     href: req.protocol + '://' + req.get('host') + req.baseUrl + '?start=' + (page * limit) + '&limit=' + limit
                 },
-                prev: {
-                    page: page - 1,
-                    href: req.protocol + '://' + req.get('host') + req.baseUrl + '?start=' + (page - 2) * limit + '&limit=' + limit
+                previous: {
+                    page: page - 1 < 1 ? 1 : page - 1,
+                    href: req.protocol + '://' + req.get('host') + req.baseUrl + '?start=' + (start - limit < 0 ? 0 : start - limit) + '&limit=' + limit
                 },
             }
         }
@@ -74,6 +83,13 @@ exports.getIdols = async (req, res, next) => {
 
 exports.getIdol = async (req, res, next) => {
     try {
+        res.set({
+            'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS, PUT',
+            'Allow': 'GET, DELETE, OPTIONS, PUT',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type'
+        });
+
         const idol = await Idol.findById(req.params.id);
         if (!idol) {
             return res.status(404).json({message: 'Idol not found'});
@@ -94,13 +110,15 @@ exports.getIdol = async (req, res, next) => {
 
 exports.createIdol = async (req, res, next) => {
     try {
-        const idol = await Idol.create(req.body);
+        const idolData = req.body.data ? req.body.data : req.body;
+        const idol = await Idol.create(idolData);
         res.status(201).json({
-            data: idol,
+            idol,
             _links: {
                 self: {href: req.protocol + '://' + req.get('host') + req.originalUrl},
                 collection: {href: req.protocol + '://' + req.get('host') + '/api/idols'}
-            }});
+            }
+        });
     } catch (error) {
         res.status(400).json({
             message: error.message
@@ -117,7 +135,7 @@ exports.updateIdol = async (req, res, next) => {
             });
         }
 
-        let idol = await Idol.findByIdAndUpdate(req.params.id, req.body, {
+        let idol = await Idol.findByIdAndUpdate(req.params.id, req.body.data, {
             new: true,
             runValidators: true
         });
@@ -133,7 +151,7 @@ exports.updateIdol = async (req, res, next) => {
 
         res.status(200).json({
             data: idol,
-            });
+        });
 
     } catch (error) {
         res.status(400).json({message: error.message});
@@ -154,25 +172,24 @@ exports.deleteIdol = async (req, res, next) => {
     }
 }
 
-    exports.optionsIdols = async (req, res, next) => {
-        res.set({
-            'Allow': 'GET, PUT, DELETE, OPTIONS, POST',
-            'Access-Control-Allow-Methods': 'GET, PUT, DELETE, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'content-type': 'application/json, application/x-www-form-urlencoded'
-        }).send();
-        res.status(204).end()
-    }
+exports.optionsIdols = async (req, res, next) => {
+    res.set({
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Allow': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    res.status(204).end();
+}
 
-    exports.optionsIdol = async (req, res, next) => {
-        res.set({
-            'Allow': 'GET, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'content-type': 'application/json, application/x-www-form-urlencoded'
-        }).send();
-        res.status(204).end()
-    }
-
+exports.optionsIdol = async (req, res, next) => {
+    res.set({
+        'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS, PUT',
+        'Allow': 'GET, DELETE, OPTIONS, PUT',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    });
+    res.status(204).end();
+}
 
 module.exports = exports;
