@@ -8,10 +8,15 @@ app.use(express.json());
 
 app.use((req, res, next) => {
     const contentType = req.headers['content-type'];
-    if (req.method === 'GET' && (!contentType || contentType !== 'application/json')) {
+if (req.method === 'POST' && (!contentType || (contentType !== 'application/json' && contentType !== 'application/x-www-form-urlencoded'))) {
         return res.status(415).send('Unsupported Media Type');
-    } else if (req.method === 'POST' && (!contentType || (contentType !== 'application/json' && contentType !== 'application/x-www-form-urlencoded'))) {
-        return res.status(415).send('Unsupported Media Type');
+    }
+    next();
+});
+app.use((req, res, next) => {
+    const acceptType = req.headers['accept'];
+    if (!acceptType || acceptType.indexOf('application/json') === -1) {
+        return res.status(406).send('Not Acceptable');
     }
     next();
 });
@@ -20,7 +25,7 @@ app.use('/api/idols', idols)
 
 connectDB()
 
-const port = 4000;
+const port = 80;
 
 app.listen(port, () => console.log(`Listening on port ${port}...`));
 
